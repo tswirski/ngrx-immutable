@@ -1,2 +1,3 @@
 # ngrx-immutable
-Redux state made easy.  Wile there is a lot of other tools in the wild most of them are either overengineered or do not provide enough flexibility to do the job.  Maintaining redux state with plain JavaScript might be pain in the...neck due to nested objects. Therefor lot of people go for the immutable-js along with redux-immutable. While it wokrs perfectly well it also brings thousands lines of code wich is not really necessary... especially if you prefere classic approach.
+
+soon... :)
