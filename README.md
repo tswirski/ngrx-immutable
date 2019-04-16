@@ -39,8 +39,12 @@ This is how our sample store looks like.
           features: []
       },
     ]
-  }]
-};```
+  },
+ ...
+  ],
+  ...
+};
+```
 
 Let's now do couple of basic Redux store operations. 
 For sake of presentation we will:
@@ -50,3 +54,56 @@ For sake of presentation we will:
 3. Remove "A/c" feature from Suzuki Vitara
 
 All of those presented head-to-head, vanilla javascript and ngrx-immutable "immute" function.
+
+1. Change of Car Model, vanilla javascript
+```
+const userIndex = store.users.findIndex(...);
+const vehicleIndex = store.users[userIndex].ownedVehicles.findIndex(...);
+
+store = {
+  ...store,
+  users: [
+    ...store.users.slice(0, userIndex),
+    {
+      ...store.users[userIndex],
+      ownedVehicles: [
+        ...store.users[userIndex].ownedVehicles.slice(0, vehicleIndex),
+        {
+          ...store.users[userIndex].ownedVehicles[vehicleIndex],
+          model: "R8"
+        },
+        ...store.users[userIndex].ownedVehicles.slice(vehicleIndex + 1),
+      ]
+    },
+    ...store.users.slice(userIndex + 1)
+  ]
+}
+```
+
+? WAT ?
+
+Now do same operation with immute:
+
+```
+store = immute(store, [
+  'users', 
+  (user) => user.id === <something>,
+  'ownedVehicles',
+  (vehicle) => vehicle.<something> = <something>,
+  'model'
+], "R8"];
+```
+
+It is also possible to use function to produce value:
+
+```
+store = immute(store, [
+  'users', 
+  (user) => user.id === <something>,
+  'ownedVehicles',
+  (vehicle) => vehicle.<something> = <something>
+], (vehicle) => ({ ...vehicle, model: "R8"})];
+```
+
+
+  
