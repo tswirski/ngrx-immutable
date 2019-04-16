@@ -6,7 +6,7 @@ Wile there is lot of other tools in the wild - most of them are either overengin
 
 This is how our sample store looks like. 
 
-`var store = {
+```var store = {
   users: [
     {
       id: 1,
@@ -40,7 +40,7 @@ This is how our sample store looks like.
       },
     ]
   }]
-};`
+};```
 
 Let's now do couple of basic Redux store operations. 
 For sake of presentation we will:
