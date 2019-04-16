@@ -163,7 +163,20 @@ We can also shorten this syntax using named functions inside path:
     (features) => ([ ...features, { id: 1, name: "Akrapovic exhaust" } ])
   );
 ```
-Nice, right?
 
+... And how do you can delete item from array you might ask.
+3. Remove "A/c" feature from Suzuki Vitara using immute:
 
-;)
+```
+  const selectUser = userID => userObj => userObj === userID;
+  const selectVehicle = vehicleModel => vehicle => vehicle.model === vehicleModel
+  const selectFeature = featureName => feature => feature.name === featureName;
+  
+  store = immute(
+    store, 
+    ['users', selectUser(1), 'ownedVehicles', selectVehicle('Vitara'), 'features', selectFeature('A/c')], 
+    undefined
+  );
+```
+
+Passing "undefined | () => undefined" as a value will exclude pointed key from object or pointed element from array.
