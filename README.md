@@ -4,7 +4,41 @@ Redux state made easy.
 
 Wile there is lot of other tools in the wild - most of them are either overengineered or do not provide enough flexibility to do the job.  Maintaining Redux state with plain JavaScript might be pain in the...neck - due to nested objects. Therefor lot of people go for the immutable-js along with redux-immutable. While it wokrs perfectly well it also brings thousands lines of code which is not really necessary... especially if you prefere classic approach.
 
-This is how our sample store looks like. 
+Short overview of "immute" function:
+
+```
+immute (
+	store: object | [any],
+	path: Array<string | number | function>,
+	value: any | (current: any) => any
+): object | [any]
+```
+
+It accepts 3 parameters: store, path and value.
+Returned value is new state of the store.
+
+	1. "store" is an object or array
+	2. "path" is array of "string", "number" and "function" elements, where:
+
+		a. "string" is consider to be a key of Object,
+		b. "number" is consider to be an index of Array,
+		c. "function" is consider to be a Array.findIndex() callable,
+    used for collection lookup.
+
+	3. "value" can be explicit value or function, where:
+
+		a. explicit value should be primitive (string | number | boolean | undefined*),
+    or immutable object | Array<any>.
+
+"undefined" is used to remove key from object or element from array.
+Example below.
+
+		b. function accepts current value for selected part of the store.
+    Returned value should met the same criteria as "explicit value" does.
+
+Please be aware that "immute" won't work if path doesn't match given store. That is intentional.
+
+This is how our sample store looks like.
 
 ```var store = {
   users: [
@@ -46,7 +80,7 @@ This is how our sample store looks like.
 };
 ```
 
-Let's now do couple of basic Redux store operations. 
+Let's now do couple of basic Redux store operations.
 For sake of presentation we will:
 
 1. Change Car Model for Audi from "A4 B6" to "R8",
@@ -86,7 +120,7 @@ Now do same operation with immute:
 
 ```
 store = immute(store, [
-  'users', 
+  'users',
   (user) => user.id === <something>,
   'ownedVehicles',
   (vehicle) => vehicle.<something> = <something>,
@@ -98,7 +132,7 @@ It is also possible to use function to produce value:
 
 ```
 store = immute(store, [
-  'users', 
+  'users',
   (user) => user.id === <something>,
   'ownedVehicles',
   (vehicle) => vehicle.<something> = <something>
@@ -136,14 +170,14 @@ store = {
   ]
 }
 ```
- This became unreadable in previous example already. 
- Yet we had to add another level of nesting. 
+ This became unreadable in previous example already.
+ Yet we had to add another level of nesting.
  Ouch!
- 
+
  Let's do the same with immute:
  ```
 store = immute(store, [
-  'users', 
+  'users',
   (user) => user.id === <something>,
   'ownedVehicles',
   (vehicle) => vehicle.<something> = <something>,
@@ -156,10 +190,10 @@ We can also shorten this syntax using named functions inside path:
 ```
   const selectUser = userID => userObj => userObj === userID;
   const selectVehicle = vehicleModel => vehicle => vehicle.model === vehicleModel
-  
+
   store = immute(
-    store, 
-    ['users', selectUser(1), 'ownedVehicles', selectVehicle('GSXR600'), 'features'], 
+    store,
+    ['users', selectUser(1), 'ownedVehicles', selectVehicle('GSXR600'), 'features'],
     (features) => ([ ...features, { id: 1, name: "Akrapovic exhaust" } ])
   );
 ```
@@ -171,10 +205,10 @@ We can also shorten this syntax using named functions inside path:
   const selectUser = userID => userObj => userObj === userID;
   const selectVehicle = vehicleModel => vehicle => vehicle.model === vehicleModel
   const selectFeature = featureName => feature => feature.name === featureName;
-  
+
   store = immute(
-    store, 
-    ['users', selectUser(1), 'ownedVehicles', selectVehicle('Vitara'), 'features', selectFeature('A/c')], 
+    store,
+    ['users', selectUser(1), 'ownedVehicles', selectVehicle('Vitara'), 'features', selectFeature('A/c')],
     undefined
   );
 ```
