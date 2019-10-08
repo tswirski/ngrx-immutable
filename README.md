@@ -214,3 +214,74 @@ We can also shorten this syntax using named functions inside path:
 ```
 
 Passing "undefined | () => undefined" as a value will exclude pointed key from object or pointed element from array.
+
+
+I've been recently asked if this library supports modifying a subset of a larger collection.
+While the answer is NO - you can still do it very easily by leveraging Array.reduce and Array.findIndex like so:
+
+```
+const data = {
+	lvl1: {
+		lvl2: [
+			{
+				userId: 1,
+				data: { value: 'aaa', },
+			},
+			{
+				userId: 2,
+				data: { value: 'bbb', },
+			},
+			{
+				userId: 1,
+				data: { value: 'ccc', },
+			},
+			{
+				userId: 3,
+				data: { value: 'ddd', },
+			}
+		],
+	},
+};
+
+const filterUser = (userId) => (user) => user.userId === userId;
+const findUser = (_user) => (user) => user === _user;
+
+immute(data, ['lvl1', 'lvl2'], (uArr) => uArr
+	.filter(filterUser(1))
+	.reduce((acc, _u) => immute(acc, [uArr.findIndex(findUser(_u))], (_uObj) => ({
+			... _uObj,
+			extra: 'some extra data'
+		})
+	), uArr)
+);
+
+```
+
+In given situation the output would be:
+
+```
+{
+	lvl1: {
+		lvl2: [
+			{
+				userId: 1,
+				extra: 'some extra data',   // this was added
+				data: { value: 'aaa', },
+			},
+			{
+				userId: 2,
+				data: { value: 'bbb', },
+			},
+			{
+				userId: 1,
+				extra: 'some extra data',   // this was added
+				data: { value: 'ccc', },
+			},
+			{
+				userId: 3,
+				data: { value: 'ddd', },
+			}
+		],
+	},
+};
+```
