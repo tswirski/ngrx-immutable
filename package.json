@@ -1,0 +1,24 @@
+{
+  "name": "ngrx-immutable",
+  "version": "1.0.6",
+  "description": "Immutable objects made easy.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "clean": "rimraf dist",
+    "build": "tsc",
+    "watch:build": "tsc --watch",
+    "watch:server": "nodemon './dist/index.js' --watch './dist'",
+    "start": "npm-run-all clean build --parallel watch:build watch:server --print-label"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tswirski/ngrx-immutable.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/tswirski/ngrx-immutable/issues"
+  },
+  "homepage": "https://github.com/tswirski/ngrx-immutable#readme"
+}

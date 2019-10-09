@@ -21,52 +21,60 @@ exports.__esModule = true;
 var getNestedObject = function (obj, path) {
     return path.reduce(function (_obj, key) { return (_obj && _obj[key] !== 'undefined' ? _obj[key] : undefined); }, obj);
 };
+var ErrorEnum;
+(function (ErrorEnum) {
+    ErrorEnum["INVALID_PATH"] = "invalid path";
+    ErrorEnum["INVALID_TYPE"] = "invalid path, path elements should be typeof \"number\", \"string\" or \"function\"";
+    ErrorEnum["NOT_ITERABLE"] = "not iterable, array expected at path";
+})(ErrorEnum || (ErrorEnum = {}));
+var throwError = function (msg, path) {
+    if (path === void 0) { path = []; }
+    throw new Error("[ngrx-immutable] " + msg + ", [" + path.join(', ') + "]");
+};
 var getObjectPath = function (obj, path) {
     return path.reduce(function (accumulator, pathElement) {
         var _obj = getNestedObject(obj, accumulator);
         if (_obj === undefined) {
-            throw Error("[immute] invalid path, \"[" + accumulator.join(', ') + "]\" does not exists");
+            throwError(ErrorEnum.INVALID_PATH, accumulator);
         }
         switch (typeof pathElement) {
-            case 'string':
             case 'number':
-                // @ts-ignore
+                if (!Array.isArray(_obj)) {
+                    throwError(ErrorEnum.NOT_ITERABLE, accumulator);
+                }
+            case 'string':
                 if (!_obj[pathElement] === undefined) {
-                    throw Error("[immute] invalid path, \"[" + __spreadArrays(accumulator, [pathElement]).join(', ') + "]\" does not exists");
+                    throwError(ErrorEnum.INVALID_PATH, __spreadArrays(accumulator, [pathElement]));
                 }
                 return __spreadArrays(accumulator, [pathElement]);
             case 'function':
                 if (!Array.isArray(_obj)) {
-                    throw Error("[immute] not iterable, element at location \"[" + accumulator.join(', ') + "]\" is not array");
+                    throwError(ErrorEnum.NOT_ITERABLE, accumulator);
                 }
-                // @ts-ignore
                 var index = _obj.findIndex(pathElement);
                 if (index === -1) {
-                    throw Error("[immute] invalid index, can not find element in collection \"[" + accumulator.join(', ') + "]\"");
+                    throwError(ErrorEnum.INVALID_PATH, __spreadArrays(accumulator, [index]));
                 }
                 return __spreadArrays(accumulator, [index]);
             default:
-                throw Error("[immute] invalid path, \"" + typeof pathElement + "\" is neither \"string\" nor \"function\"");
+                throwError(ErrorEnum.INVALID_TYPE, __spreadArrays(accumulator, ["<" + typeof pathElement + ">"]));
         }
     }, []);
 };
-var getImmutedObject = function (store, path, value) {
+var getImmutableObject = function (store, path, value) {
     var _a;
     if (path.length === 0) {
         return value;
     }
-    var _path = getObjectPath(store, path);
-    // @ts-ignore
-    var parent = getNestedObject(store, _path.slice(0, -1));
-    var object = getNestedObject(store, _path);
-    var selector = _path[_path.length - 1];
+    var parent = getNestedObject(store, path.slice(0, -1));
+    var selector = path[path.length - 1];
+    var object = parent[selector];
     var _ref = typeof selector === 'number' ? [] : {};
     var _value = typeof value === 'function' ? value(object) : value;
     // @ts-ignore
     var _parent = Object.assign(_ref, parent, (_a = {}, _a[selector] = _value, _a));
     if (_value === undefined) {
         if (typeof selector === 'number') {
-            // @ts-ignore
             _parent = _parent.filter(function (el) { return el !== undefined; });
         }
         else {
@@ -75,11 +83,13 @@ var getImmutedObject = function (store, path, value) {
         }
     }
     Object.freeze(_parent);
-    return getImmutedObject(store, path.slice(0, -1), _parent);
+    return getImmutableObject(store, path.slice(0, -1), _parent);
 };
-exports.immute = function (store, path, value) {
+exports.immutable = function (store, path, value) {
     if (path.length === 0) {
-        throw Error("[immute] invalid path, empty");
+        throwError(ErrorEnum.INVALID_PATH);
     }
-    return getImmutedObject(store, path, value);
+    var _path = getObjectPath(store, path);
+    return getImmutableObject(store, _path, value);
 };
+exports.immute = exports.immutable;
